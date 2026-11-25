@@ -70,7 +70,8 @@ async function play(message) {
     await new Promise(resolve => setTimeout(resolve, 250));
     if (active !== message) return;
     document.body.classList.remove('lit');
-    if (i + 1 < message.count) await new Promise(resolve => setTimeout(resolve, 500));
+    // Keep a dark interval even between consecutive one-flash signals.
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
   if (active !== message) return;
   stopPlayback();
