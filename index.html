@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101411"><link rel="icon" href="data:,"><title>Flash Signal</title><link rel="stylesheet" href="style.css"><script defer src="vendor/mqtt.min.js"></script><script defer src="app.js"></script></head>
+<body><main>
+<section id="home"><div class="mark" aria-hidden="true">ϟ</div><h1>Flash Signal</h1><p>Open this link on both phones. Choose one role on each. The receiver screen flashes white. Tap its dark screen to exit.</p>
+<button id="sender">Sender <span>↗</span></button><button id="receiver">Receiver <span>↘</span></button></section>
+<section id="send" hidden><button class="back">← Change role</button><h1>Sender</h1><p id="status" role="status">Connecting…</p><div id="keys"></div><p id="result" role="status"></p></section>
+<section id="receive" hidden><button class="back">← Change role</button><h1>Receiver</h1><p id="listen" role="status">Connecting…</p></section>
+</main></body></html>
