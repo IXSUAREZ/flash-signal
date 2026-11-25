@@ -7,7 +7,7 @@ const uid = () => crypto.randomUUID();
 const validCount = n => Number.isInteger(n) && n >= 1 && n <= 5;
 const label = n => String.fromCharCode(64 + n);
 const peers = new Map();
-let role, client, session, online, active, pending, wake;
+let role, client, session, previous, online, active, pending, wake;
 let seen = new Set();
 
 for (let n = 1; n <= 5; n++) {
@@ -22,7 +22,7 @@ function publish(type, fields = {}) {
 }
 
 function presence() {
-  publish('presence', { id: session, count: active?.count || 0 });
+  publish('presence', { id: session, previous, count: active?.count || 0 });
 }
 
 function stopPlayback() {
@@ -98,6 +98,7 @@ function handle(m) {
     return;
   }
   if (m.type === 'presence' && typeof m.id === 'string' && (m.count === 0 || validCount(m.count))) {
+    if (m.previous && m.previous !== m.id) departed(m.previous);
     peers.set(m.id, { count:m.count, at:performance.now() });
   } else if (m.type === 'bye') departed(m.id);
   else if (pending && m.id === pending.id) {
@@ -133,11 +134,21 @@ function connect() {
   if (!role || document.hidden || client) return;
   const c = mqtt.connect(relay, {
     clean:true, reconnectPeriod:2000, connectTimeout:10000, keepalive:12,
-    queueQoSZero:false, resubscribe:false
+    queueQoSZero:false, resubscribe:false,
+    transformWsUrl(url, options) {
+      session = uid();
+      if (role === 'receive') {
+        try {
+          previous = sessionStorage.getItem('last-receiver');
+          sessionStorage.setItem('last-receiver', session);
+        } catch { previous = null; }
+        options.will = { topic, payload: JSON.stringify({ type:'bye', id:session }), qos:0, retain:false };
+      }
+      return url;
+    }
   });
   client = c;
   c.on('connect', () => {
-    session = uid();
     const epoch = session;
     c.subscribe(topic, { qos:0 }, error => {
       if (client !== c || session !== epoch || !c.connected || error) return;
